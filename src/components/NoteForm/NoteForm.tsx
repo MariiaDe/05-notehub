@@ -2,14 +2,14 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import styles from './NoteForm.module.css';
 
-type NoteTag = 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping';
-const ALLOWED_TAGS: NoteTag[] = ['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'] as const;
+export type NoteTag = 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping';
+const ALLOWED_TAGS: NoteTag[] = ['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'];
 
-interface Props {
+export interface NoteFormProps {
   onSubmit: (values: {
     title: string;
     content: string;
-    tag: NoteTag; 
+    tag: NoteTag;
   }) => void;
   onCancel: () => void;
 }
@@ -29,49 +29,49 @@ const validationSchema = Yup.object({
     .required('Tag is required'),
 });
 
-export default function NoteForm({ onSubmit, onCancel }: Props) {
+export default function NoteForm({ onSubmit, onCancel }: NoteFormProps) {
   return (
     <Formik
       initialValues={{
         title: '',
         content: '',
-        tag: 'Todo' as const,
+        tag: 'Todo' as NoteTag,
       }}
       validationSchema={validationSchema}
       onSubmit={(values, { setSubmitting }) => {
-        onSubmit(values);
+        onSubmit({
+          ...values,
+          tag: values.tag as NoteTag,
+        });
         setSubmitting(false);
       }}
     >
-      {({ isSubmitting }) => (
+      {({ isSubmitting, values, setFieldValue }) => (
         <Form className={styles.form}>
           <div className={styles.formGroup}>
             <label htmlFor="title">Title</label>
-            <Field
-              id="title"
-              name="title"
-              type="text"
-              className={styles.input}
-              autoFocus
-            />
+            <Field id="title" name="title" type="text" className={styles.input} autoFocus />
             <ErrorMessage name="title" component="span" className={styles.error} />
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="content">Content</label>
-            <Field
-              as="textarea"
-              id="content"
-              name="content"
-              rows={8}
-              className={styles.textarea}
-            />
+            <Field as="textarea" id="content" name="content" rows={8} className={styles.textarea} />
             <ErrorMessage name="content" component="span" className={styles.error} />
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="tag">Tag</label>
-            <Field as="select" id="tag" name="tag" className={styles.select}>
+            <Field
+              as="select"
+              id="tag"
+              name="tag"
+              className={styles.select}
+              value={values.tag}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                setFieldValue('tag', e.target.value as NoteTag)
+              }
+            >
               {ALLOWED_TAGS.map((tag) => (
                 <option key={tag} value={tag}>
                   {tag}
@@ -85,11 +85,7 @@ export default function NoteForm({ onSubmit, onCancel }: Props) {
             <button type="button" className={styles.cancelButton} onClick={onCancel}>
               Cancel
             </button>
-            <button
-              type="submit"
-              className={styles.submitButton}
-              disabled={isSubmitting}
-            >
+            <button type="submit" className={styles.submitButton} disabled={isSubmitting}>
               Create note
             </button>
           </div>

@@ -1,12 +1,12 @@
 import type { Note } from '../../types/note';
 import styles from './NoteList.module.css';
 
-interface Props {
+export interface NoteListProps {
   notes: Note[];
   onDelete: (id: string) => void;
 }
 
-export default function NoteList({ notes, onDelete }: Props) {
+export default function NoteList({ notes, onDelete }: NoteListProps) {
   if (notes.length === 0) return null;
 
   return (
